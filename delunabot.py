@@ -98,6 +98,7 @@ class DelunaBot(irc.IRCClient):
         try:
             postal_code = command.split('.weather')[1].strip()
             results = get_weather(postal_code, WeatherOptions())
+
             msg = 'It is %(current_condition)s in %(city)s with a high of %(high)s and low of %(low)s, current temp is: %(current_temp)s %(units)s' % dict(
                 current_condition=str(results['current_condition']),
                 city=str(results['city']),
@@ -106,7 +107,7 @@ class DelunaBot(irc.IRCClient):
                 high=str(results['forecasts'][0]['high']),
                 low=str(results['forecasts'][0]['low']),
             )
-        except IndexError:
+        except:
             msg = 'Please provide a valid postal code'
 
         self.msg(channel, msg)
