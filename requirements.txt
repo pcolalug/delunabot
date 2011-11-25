@@ -1,4 +1,6 @@
 twisted
 fortune
 icalendar
+grizzled-python==1.0
 python-dateutil
+
