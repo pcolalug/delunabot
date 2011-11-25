@@ -87,7 +87,7 @@ class DelunaBot(irc.IRCClient):
                 self.help(channel, user)
 
     def website(self, channel, user):
-        msg = "%s: http://pcolalug.org" % user
+        msg = "%s: http://pcolalug.com" % user
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.nickname, msg))
 
