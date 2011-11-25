@@ -83,8 +83,35 @@ class DelunaBot(irc.IRCClient):
                 self.nextmeeting(channel, user)
             if command == '.website':
                 self.website(channel, user)
+            if command.startswith('.weather'):
+                self.weather(channel, user, command)
             if command == '.help':
                 self.help(channel, user)
+
+    def weather(self, channel, user, command):
+        from weather import get_weather
+
+        class WeatherOptions(object):
+            def __init__(self, metric=False, forecast=1):
+                self.metric = metric
+                self.forecast = forecast
+        try:
+            postal_code = command.split('.weather')[1].strip()
+            results = get_weather(postal_code, WeatherOptions())
+            msg = 'It is %(current_condition)s in %(city)s with a high of %(high)s and low of %(low)s, current temp is: %(current_temp)s %(units)s' % dict(
+                current_condition=str(results['current_condition']),
+                city=str(results['city']),
+                current_temp=str(results['current_temp']),
+                units=str(results['units']),
+                high=str(results['forecasts'][0]['high']),
+                low=str(results['forecasts'][0]['low']),
+            )
+        except IndexError:
+            msg = 'Please provide a valid postal code'
+
+        self.msg(channel, msg)
+        self.logger.log("<%s> %s" % (self.nickname, msg))
+
 
     def website(self, channel, user):
         msg = "%s: http://pcolalug.com" % user
