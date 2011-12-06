@@ -12,7 +12,7 @@ from twisted.python import log
 
 # system imports
 import time, sys
-
+import re
 
 class MessageLogger:
     """
@@ -34,9 +34,8 @@ class MessageLogger:
 
 class DelunaBot(irc.IRCClient):
     """ The DelunaBot """
-    
-    nickname = "DelunaBot"
-    
+    messages = {}
+
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.logger = MessageLogger(open(self.factory.filename, "a"))
@@ -66,13 +65,12 @@ class DelunaBot(irc.IRCClient):
         self.logger.log("<%s> %s" % (user, msg))
         
         # Check to see if they're sending me a private message
-        if channel == self.nickname:
+        if channel == self.factory.nickname:
             msg = "It isn't nice to whisper!  Play nice with the group."
             self.msg(user, msg)
             return
-
         # Otherwise check to see if it is a message directed at me
-        if msg.startswith(self.nickname + ":"):
+        elif msg.startswith(self.factory.nickname + ":"):
             message = msg.partition(':')[2]
             command = message.lower().strip()
             if command == 'ping':
@@ -87,6 +85,24 @@ class DelunaBot(irc.IRCClient):
                 self.weather(channel, user, command)
             if command == '.help':
                 self.help(channel, user)
+        else:
+            self.check_for_search_replace(channel, user, msg)
+
+        self.messages[user] = msg
+
+
+    def check_for_search_replace(self, channel, user, msg):
+        if user in self.messages.keys():
+            last_message = self.messages[user]
+
+            match = re.match('^s\/(.+)\/(.+)\/$', msg, flags=re.DOTALL | re.MULTILINE)
+
+            if match:
+                to_replace = match.group(1)
+                if to_replace in last_message:
+                    msg = last_message.replace(to_replace, match.group(2))
+
+                    self.msg(channel, '%s meant: %s'  % (user, msg))
 
     def weather(self, channel, user, command):
         from weather import get_weather
@@ -111,23 +127,23 @@ class DelunaBot(irc.IRCClient):
             msg = 'Please provide a valid postal code'
 
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
 
     def website(self, channel, user):
         msg = "%s: http://pcolalug.com" % user
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def help(self, channel, user):
         msg = "%s: .website, .fortune, .nextmeeting, .weather <postal code>" % user
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def pong(self, channel, user):
         msg = "%s: pong!" % user
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def nextmeeting(self, channel, user):
         import urllib
@@ -176,7 +192,7 @@ class DelunaBot(irc.IRCClient):
         }
 
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def fortune(self, channel, user):
         from random import choice
@@ -200,7 +216,7 @@ class DelunaBot(irc.IRCClient):
 
         msg = "%s: %s" % (user, fortune)
         self.msg(channel, msg)
-        self.logger.log("<%s> %s" % (self.nickname, msg))
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def action(self, user, channel, msg):
         """This will get called when the bot sees someone do an action."""
@@ -233,12 +249,14 @@ class LogBotFactory(protocol.ClientFactory):
     A new protocol instance will be created each time we connect to the server.
     """
 
-    def __init__(self, channel, filename):
+    def __init__(self, channel, filename, nickname):
         self.channel = channel
         self.filename = filename
+        self.nickname = nickname
 
     def buildProtocol(self, addr):
         p = DelunaBot()
+        p.nickname = self.nickname
         p.factory = self
         return p
 
@@ -256,7 +274,12 @@ if __name__ == '__main__':
     log.startLogging(sys.stdout)
     
     # create factory protocol and application
-    f = LogBotFactory(sys.argv[1], sys.argv[2])
+    nickname = 'DelunaBot'
+
+    if len(sys.argv) == 4:
+        nickname = sys.argv[3]
+
+    f = LogBotFactory(sys.argv[1], sys.argv[2], nickname)
 
     # connect factory to this host and port
     reactor.connectTCP("irc.freenode.net", 6667, f)
