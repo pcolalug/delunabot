@@ -70,23 +70,22 @@ class DelunaBot(irc.IRCClient):
             self.msg(user, msg)
             return
         # Otherwise check to see if it is a message directed at me
-        elif msg.startswith(self.factory.nickname + ":"):
-            message = msg.partition(':')[2]
-            command = message.lower().strip()
+        else:
+            command = msg.lower().strip()
             if command == 'ping':
                 self.pong(channel, user)
-            if command == '.fortune':
+            elif command == '.fortune':
                 self.fortune(channel, user)
-            if command == '.nextmeeting':
+            elif command == '.nextmeeting':
                 self.nextmeeting(channel, user)
-            if command == '.website':
+            elif command == '.website':
                 self.website(channel, user)
-            if command.startswith('.weather'):
+            elif command.startswith('.weather'):
                 self.weather(channel, user, command)
-            if command == '.help':
+            elif command == '.help':
                 self.help(channel, user)
-        else:
-            self.check_for_search_replace(channel, user, msg)
+            else:
+                self.check_for_search_replace(channel, user, msg)
 
         self.messages[user] = msg
 
