@@ -174,21 +174,22 @@ class DelunaBot(irc.IRCClient):
                 location = 'TBA'
 
             events.append({
+                        'real_date': date,
                         'start': date.strftime(format),
                         'description': description if description else 'No Description',
                         'summary': summary,
                         'location': location
                         })
 
-        sorted_list = sorted(events, key=lambda k: k['start'])
+        sorted_list = sorted(events, key=lambda k: k['real_date'], reverse=True)
         next_meeting = sorted_list[0]
 
         msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % {
                 'user': user,
                 'topic': str(next_meeting['summary']),
                 'start': str(next_meeting['start']),
-                'description': str(next_meeting['description']),
-                'location': str(next_meeting['location']),
+                'description': str(next_meeting['description'].title()),
+                'location': str(next_meeting['location'].title()),
         }
 
         self.msg(channel, msg)
