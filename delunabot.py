@@ -78,6 +78,8 @@ class DelunaBot(irc.IRCClient):
                 self.fortune(channel, user)
             elif command == '.nextmeeting':
                 self.nextmeeting(channel, user)
+            elif command == '.mailinglist':
+                self.mailinglist(channel, user)
             elif command == '.website':
                 self.website(channel, user)
             elif command.startswith('.weather'):
@@ -135,7 +137,7 @@ class DelunaBot(irc.IRCClient):
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def help(self, channel, user):
-        msg = "%s: .website, .fortune, .nextmeeting, .weather <postal code>" % user
+        msg = "%s: .website, .fortune, .nextmeeting, .mailinglist, .weather <postal code>" % user
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
@@ -144,10 +146,16 @@ class DelunaBot(irc.IRCClient):
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
+    def mailinglist(self, channel, user):
+        msg = "%s: http://groups.google.com/group/pcolalug" % user
+        self.msg(channel, msg)
+        self.logger.log("<%s> %s" % (self.factory.nickname, msg))
+
     def nextmeeting(self, channel, user):
         import urllib
         from icalendar import Calendar
         from dateutil import tz
+        import datetime
         DATE_FORMAT = "%B %d, %Y @ %-I:%M %p"
         DATE_FORMAT_NO_TIME = "%B %d, %Y @ All Day"
 
@@ -181,7 +189,7 @@ class DelunaBot(irc.IRCClient):
                         })
 
         sorted_list = sorted(events, key=lambda k: k['real_date'], reverse=True)
-        next_meeting = sorted_list[0]
+        next_meeting = [x for x in sorted_list if x['real_date'].date() >= datetime.date.today()][0]
 
         msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % {
                 'user': user,
