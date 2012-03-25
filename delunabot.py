@@ -189,10 +189,10 @@ class DelunaBot(irc.IRCClient):
                         })
 
         sorted_list = sorted(events, key=lambda k: k['real_date'], reverse=True)
+        next_meeting = None
         for x in sorted_list:
             if x['real_date'].date() >= datetime.date.today():
                 next_meeting = x
-        next_meeting = None
         if next_meeting:
             msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % { 
                     'user': user,
