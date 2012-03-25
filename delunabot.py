@@ -162,7 +162,7 @@ class DelunaBot(irc.IRCClient):
         ics = urllib.urlopen("https://www.google.com/calendar/ical/pcolalug%40gmail.com/public/basic.ics").read()
         events = []
 
-        cal = Calendar.from_string(ics)
+        cal = Calendar.from_ical(ics)
 
         for event in cal.walk('vevent'):
             to_zone = tz.gettz('America/Chicago')
@@ -189,16 +189,20 @@ class DelunaBot(irc.IRCClient):
                         })
 
         sorted_list = sorted(events, key=lambda k: k['real_date'], reverse=True)
-        next_meeting = [x for x in sorted_list if x['real_date'].date() >= datetime.date.today()][0]
-
-        msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % {
-                'user': user,
-                'topic': str(next_meeting['summary']),
-                'start': str(next_meeting['start']),
-                'description': str(next_meeting['description'].title()),
-                'location': str(next_meeting['location'].title()),
-        }
-
+        for x in sorted_list:
+            if x['real_date'].date() >= datetime.date.today():
+                next_meeting = x
+        try:
+            print next_meeting
+            msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % { 
+                    'user': user,
+                    'topic': str(next_meeting['summary']),
+                    'start': str(next_meeting['start']),
+                    'description': str(next_meeting['description'].title()),
+                    'location': str(next_meeting['location'].title()),
+            }
+        except:
+            msg = "Meetings are held the 3rd Tuesday of each month at Ozone's at 7pm."
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
