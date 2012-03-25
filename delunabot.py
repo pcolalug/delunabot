@@ -116,8 +116,8 @@ class DelunaBot(irc.IRCClient):
             postal_code = command.split('.weather')[1].strip()
             results = get_weather(postal_code, WeatherOptions())
 
-            msg = 'It is %(current_condition)s in %(city)s with a high of %(high)s and low of %(low)s, current temp is: %(current_temp)s %(units)s' % dict(
-                current_condition=str(results['current_condition']),
+            msg = 'It is %(current_condition)s in %(city)s with a high of %(high)s and low of %(low)s, the current temperature is %(current_temp)s %(units)s' % dict(
+                current_condition=str(results['current_condition']).lower(),
                 city=str(results['city']),
                 current_temp=str(results['current_temp']),
                 units=str(results['units']),
