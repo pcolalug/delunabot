@@ -188,12 +188,11 @@ class DelunaBot(irc.IRCClient):
                         'location': location
                         })
 
-        sorted_list = sorted(events, key=lambda k: k['real_date'], reverse=True)
-        next_meeting = None
-        for x in sorted_list:
-            if x['real_date'].date() >= datetime.date.today():
-                next_meeting = x
-        if next_meeting:
+        sorted_list = [x for x in sorted(events, key=lambda k: k['real_date'], reverse=True) if x['real_date'].date() >= datetime.date.today()]
+
+        if len(sorted_list) >= 1:
+            next_meeting = sorted_list[-1]
+
             msg = "%(user)s: Next Meeting is: %(topic)s on %(start)s: %(description)s, meeting at: %(location)s" % { 
                     'user': user,
                     'topic': str(next_meeting['summary']),
@@ -203,6 +202,7 @@ class DelunaBot(irc.IRCClient):
             }
         else:
             msg = "Meetings are held the 3rd Tuesday of each month at Ozone's at 7pm."
+
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
