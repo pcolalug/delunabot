@@ -188,7 +188,14 @@ class DelunaBot(irc.IRCClient):
                         'location': location
                         })
 
-        sorted_list = [x for x in sorted(events, key=lambda k: k['real_date'], reverse=True) if x['real_date'].date() >= datetime.date.today()]
+
+        next_meetings = []
+
+        for meeting in events:
+            if meeting['real_date'].date() >= datetime.date.today():
+                next_meetings.append(meeting)
+
+        sorted_list = sorted(next_meetings, key=lambda k: k['real_date'], reverse=True)
 
         if len(sorted_list) >= 1:
             next_meeting = sorted_list[-1]
