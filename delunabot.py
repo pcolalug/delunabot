@@ -107,14 +107,22 @@ class DelunaBot(irc.IRCClient):
 
     def weather(self, channel, user, command):
         from weather import get_weather
+        from location import get_woeid
 
         class WeatherOptions(object):
             def __init__(self, metric=False, forecast=1):
                 self.metric = metric
                 self.forecast = forecast
         try:
-            postal_code = command.split('.weather')[1].strip()
-            results = get_weather(postal_code, WeatherOptions())
+            location = command.split('.weather')[1].strip()
+            woeid = None
+
+            try:
+                woeid = get_woeid(location)
+            except:
+                woeid = location
+
+            results = get_weather(woeid, WeatherOptions())
 
             msg = 'It is %(current_condition)s in %(city)s with a high of %(high)s and low of %(low)s, the current temperature is %(current_temp)s %(units)s' % dict(
                 current_condition=str(results['current_condition']).lower(),

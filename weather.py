@@ -19,7 +19,7 @@ from xml.dom.minidom import parse
 
 # Yahoo!'s limit on the number of days they will forecast
 DAYS_LIMIT = 2
-WEATHER_URL = 'http://xml.weather.yahoo.com/forecastrss?p=%s'
+WEATHER_URL = 'http://xml.weather.yahoo.com/forecastrss?w=%s'
 METRIC_PARAMETER = '&u=c'
 WEATHER_NS = 'http://xml.weather.yahoo.com/ns/rss/1.0'
 
