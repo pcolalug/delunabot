@@ -145,7 +145,7 @@ class DelunaBot(irc.IRCClient):
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
     def help(self, channel, user):
-        msg = "%s: .website, .fortune, .nextmeeting, .mailinglist, .weather <postal code>" % user
+        msg = "%s: .website, .fortune, .nextmeeting, .mailinglist, .weather <location>" % user
         self.msg(channel, msg)
         self.logger.log("<%s> %s" % (self.factory.nickname, msg))
 
