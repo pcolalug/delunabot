@@ -200,7 +200,12 @@ class DelunaBot(irc.IRCClient):
         next_meetings = []
 
         for meeting in events:
-            if meeting['real_date'].date() >= datetime.date.today():
+            if hasattr(meeting['real_date'], 'date'):
+                compare_date = meeting['real_date'].date()
+            else:
+                compare_date = meeting['real_date']
+                
+            if compare_date >= datetime.date.today():
                 next_meetings.append(meeting)
 
         sorted_list = sorted(next_meetings, key=lambda k: k['real_date'], reverse=True)
